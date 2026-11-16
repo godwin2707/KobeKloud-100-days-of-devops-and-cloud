@@ -1,0 +1,16 @@
+EC2 Key Pair
+- An EC2 Key Pair is used to securely connect to an AWS EC2 instance through SSH.
+- It consists of two keys:
+  - Public Key: Stored on the EC2 instance.
+  - Private Key (.pem): Downloaded and stored on your local machine.
+- The private key authenticates your identity when connecting to the EC2 instance.
+- It provides secure access without requiring a traditional SSH password.
+SSH Connection:
+ssh -i my-key.pem ubuntu@<EC2-Public-IP>
+
+
+Important Notes:
+- Never share your private key.
+- Use chmod 400 to restrict private key permissions.
+- AWS does not allow you to download the original private key again if lost.
+Remember: Public key = Lock; Private key = Key.
