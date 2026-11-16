@@ -1,0 +1,63 @@
+Day 1 – Create a User with a Non-Interactive Shell
+Objective
+Create a user named rose with a non-interactive shell on App Server 1 (stapp01).
+Steps Performed
+1. Connect to App Server 1 through the Jump Host
+ssh tony@stapp01
+
+
+2. Create the user with /sbin/nologin shell
+sudo useradd -s /sbin/nologin rose
+
+
+3. Verify user creation
+grep "rose" /etc/passwd
+
+
+Output:
+rose:x:1001:1001::/home/rose:/sbin/nologin
+
+
+4. Verify non-interactive login
+sudo su - rose
+
+
+Output:
+This account is currently not available.
+
+
+This confirms that the user cannot access an interactive login shell.
+Important Concepts Learned
+- Jump Host: An intermediary server used to access private servers securely.
+- SSH: Secure Shell, used to connect to remote Linux servers.
+- useradd: Linux command used to create a new user.
+- -s: Option used to specify the user's login shell.
+- /sbin/nologin: Prevents a user from starting an interactive login session.
+- /etc/passwd: Stores Linux user account information.
+- sudo: Allows authorized users to execute commands with elevated privileges.
+Additional Notes
+The command:
+sudo useradd -s /sbin/nologin rose
+
+
+- Creates the user rose.
+- Sets the login shell to /sbin/nologin.
+- Does not explicitly create a home directory (-m is not used).
+- Creates a regular user account in the challenge environment.
+Real-World Use Case
+Non-interactive users are useful for running applications and background services.
+
+For example:
+1. Create a service user named rose.
+2. Assign ownership of the application directory:
+sudo chown -R rose:rose /opt/myapp
+
+
+3. Configure the systemd service to run as rose:
+[Service]
+User=rose
+
+
+This allows the application to run without giving the service account normal interactive server access.
+Key Takeaway
+Use non-interactive service accounts to run applications with limited permissions and reduce unnecessary interactive access to Linux servers.
