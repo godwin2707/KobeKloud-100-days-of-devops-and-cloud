@@ -1,0 +1,46 @@
+Day 2 – Create an AWS EC2 Security Group
+
+Objective
+
+Create a security group named nautilus-sg under the default VPC with HTTP and SSH inbound rules.
+Configuration
+Setting	Value
+Security Group Name	nautilus-sg
+Description	Security group for Nautilus App Servers
+VPC	Default VPC
+VPC CIDR	172.31.0.0/16
+
+Inbound Rules
+Type	Protocol	Port	Source
+HTTP	TCP	80	0.0.0.0/0
+SSH	TCP	22	0.0.0.0/0
+
+Steps Performed
+1. Opened AWS EC2 Console.
+2. Navigated to Network & Security → Security Groups.
+3. Clicked Create security group.
+4. Entered the security group name and description.
+5. Selected the default VPC.
+6. Added HTTP (port 80) and SSH (port 22) inbound rules.
+7. Set the source CIDR to 0.0.0.0/0 for both rules.
+8. Created the security group successfully.
+
+Important Concepts Learned
+- Security Group: Acts as a virtual firewall controlling inbound and outbound traffic for EC2 instances.
+- Default VPC: A pre-configured virtual network automatically created by AWS in each region.
+- VPC CIDR (172.31.0.0/16): Defines the private IPv4 address range available within the VPC.
+- 0.0.0.0/0: Represents all IPv4 addresses.
+- HTTP (Port 80): Used for web traffic.
+- SSH (Port 22): Used for secure remote Linux server access.
+
+Default VPC – Traffic Allowance
+By default, AWS creates the following network configuration:
+- Inbound traffic: The default security group allows inbound traffic from network interfaces associated with the same security group.
+- Outbound traffic: Allows all outbound IPv4 traffic (0.0.0.0/0) by default.
+- Internet Gateway (IGW): Provides internet connectivity to resources in public subnets when routing and public IP requirements are satisfied.
+- Network ACL: Default network ACL allows inbound and outbound traffic.
+
+Key Takeaway
+Security groups act as virtual firewalls for EC2 instances. The default VPC provides a pre-configured network with basic connectivity.
+
+Security Note: Allowing SSH from 0.0.0.0/0 exposes SSH to the entire internet. In production, restrict SSH access to trusted IP addresses.
