@@ -1,0 +1,41 @@
+Day 2 – Create a User with an Expiry Date
+  
+Objective
+  
+Create a user named kirsty on App Server 2 (stapp02) in Stratos Datacenter and set the account expiry date to 2027-03-28.
+  
+Steps Performed
+1. Connect to App Server 2 through the Jump Host
+ssh steve@stapp02
+
+
+2. Create the user with an expiry date
+sudo adduser -e 2027-03-28 kirsty
+
+
+3. Verify user creation
+cat /etc/passwd | grep "kirsty"
+
+
+Output:
+kirsty:x:1001:1001::/home/kirsty:/bin/bash
+
+
+4. Verify account expiry date
+sudo chage -l kirsty
+
+
+Expected output:
+Account expires : Mar 28, 2027
+
+
+Important Concepts Learned
+- adduser: Command used to create a new Linux user.
+- -e: Sets the account expiration date.
+- /etc/passwd: Stores Linux user account information.
+- chage: Used to view or modify password aging and account expiry information.
+- Account Expiry: Prevents an account from being used after its configured expiration date.
+  
+
+Key Takeaway
+Account expiration is useful for managing temporary employees, contractors, and developers by automatically restricting account access after a specified date.
