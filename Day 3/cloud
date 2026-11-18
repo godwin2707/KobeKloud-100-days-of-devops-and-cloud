@@ -1,0 +1,40 @@
+Day 3 – Create a Subnet in the Default VPC (AWS)
+
+Objective
+
+Create a subnet named xfusion-subnet inside the default VPC.
+
+Configuration
+Setting                 Value
+Subnet Name             xfusion-subnet
+Subnet ID               subnet-0bcd1d7b17e53243e
+VPC                     Default VPC (vpc-0e4a47901800250e5)
+IPv4 CIDR               172.31.128.0/20
+State                   Available
+Block Public Access     Off
+
+Steps Performed
+1. Opened the AWS VPC Console.
+2. Navigated to Virtual private cloud -> Subnets.
+3. Clicked Create subnet.
+4. Selected the default VPC.
+5. Entered the subnet name (xfusion-subnet).
+6. Entered the IPv4 CIDR block 172.31.128.0/20 (inside the VPC range 172.31.0.0/16).
+7. Created the subnet; the console confirmed "You have successfully created 1 subnet".
+8. Verified the subnet shows the Available state.
+9. Reviewed the default Network ACL outbound rules.
+
+Verification – Network ACL Outbound Rules (default)
+Rule   Type          Protocol   Port Range   Destination   Action
+100    All traffic   All        All          0.0.0.0/0     Allow
+*      All traffic   All        All          0.0.0.0/0     Deny
+
+Important Concepts Learned
+- Subnet: A smaller IP range carved out of a VPC CIDR, tied to one Availability Zone. Resources such as EC2 instances are launched into subnets.
+- Subnet CIDR (172.31.128.0/20): Provides 4,096 addresses (AWS reserves 5 per subnet), and must sit inside the VPC CIDR without overlapping other subnets.
+- Network ACL (NACL): A stateless, subnet-level firewall. Rules are evaluated in number order; the final "*" rule denies anything not matched.
+- NACL vs Security Group: NACLs work at the subnet level and are stateless; security groups work at the instance level and are stateful.
+- Public vs private subnet: A subnet is public only if its route table sends 0.0.0.0/0 to an Internet Gateway.
+
+Key Takeaway
+VPCs are divided into subnets, which organize and isolate resources. The default NACL allows all outbound traffic, so access is controlled mainly by security groups and route tables.

@@ -1,0 +1,40 @@
+Day 3 – Disable Direct SSH Root Login on App Servers (DevOps / Linux)
+
+Objective
+
+Following xFusionCorp Industries security audits, disable direct root SSH login on all app servers in the Stratos Datacenter and apply the change to the running SSH service.
+
+Environment
+Server    User     Access
+stapp01   tony     SSH from jump host (sudo / wheel group)
+stapp02   steve    SSH from jump host
+stapp03   banner   SSH from jump host
+
+Configuration Change
+File:     /etc/ssh/sshd_config
+Setting:  PermitRootLogin no
+
+Steps Performed (repeated on each server)
+1. Connected from the jump host: ssh <user>@<server> (accepted the host fingerprint).
+2. Confirmed identity with whoami and id (user in the wheel group, so sudo is available).
+3. Opened the config: sudo nano /etc/ssh/sshd_config
+4. Set PermitRootLogin no (uncommented and changed from yes).
+5. Validated the syntax: sudo sshd -t (no output = valid).
+6. Restarted the service: sudo systemctl restart sshd
+7. Verified: sudo systemctl status sshd showed active (running) and listening on port 22.
+
+Troubleshooting
+- sudo systemctl restart ssh failed with "Unit ssh.service not found". These servers are RHEL-family, where the service is named sshd, not ssh.
+- On a final check of stapp01, a second PermitRootLogin yes entry was found near the end of the file. It was changed to no so no conflicting value remained, and the config was re-validated with sshd -t.
+
+Important Concepts Learned
+- PermitRootLogin: sshd directive controlling whether root can log in over SSH.
+- sshd -t: Tests the configuration for errors before restarting, avoiding lockouts.
+- Restart required: Changes to sshd_config only take effect after the service is restarted/reloaded.
+- Service names differ: sshd (RHEL/CentOS/Rocky) vs ssh (Debian/Ubuntu).
+- Least privilege: Admins log in as normal users and use sudo, which gives an audit trail and removes the root brute-force target.
+
+Key Takeaway
+Disabling direct root SSH login hardens servers. Always validate with sshd -t, restart the right service, and verify its status.
+
+Security Note: Keep a working non-root sudo user and an open session while testing, so a config mistake doesn't lock you out.
