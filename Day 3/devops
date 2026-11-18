@@ -37,4 +37,10 @@ Important Concepts Learned
 Key Takeaway
 Disabling direct root SSH login hardens servers. Always validate with sshd -t, restart the right service, and verify its status.
 
+Why Organizations Block Direct Root SSH Login
+1. Hides the target: Attackers cannot simply try the "root" username.
+2. Tracks people: Admins log in with named accounts and use sudo, so every privileged action has a name attached.
+3. Limits damage: A stolen normal-user login does not give full control of the server.
+4. Compliance: Standards such as PCI-DSS, ISO 27001 and CIS benchmarks require or recommend disabling direct root login. This is why the task came from security audits.
+
 Security Note: Keep a working non-root sudo user and an open session while testing, so a config mistake doesn't lock you out.
