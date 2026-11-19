@@ -1,0 +1,30 @@
+Day 4 – Enable Versioning on an Amazon S3 Bucket (AWS)
+
+Objective
+
+Enable versioning on the S3 bucket nautilus-s3-618805932 so that accidental deletions and overwrites can be recovered.
+
+Configuration
+Setting                  Value
+Bucket Name              nautilus-s3-618805932
+AWS Region               US East (N. Virginia) us-east-1
+Bucket Versioning        Enabled
+MFA Delete               Disabled
+
+Steps Performed
+1. Opened the AWS S3 Console.
+2. Selected the bucket nautilus-s3-618805932.
+3. Opened the Properties tab.
+4. Under Bucket Versioning, clicked Edit.
+5. Enabled bucket versioning and saved.
+6. Confirmed the success banner "Successfully edited Bucket Versioning" and verified the status shows Enabled.
+
+Important Concepts Learned
+- S3 Versioning: Keeps every version of an object in the same bucket, so older data can be restored after an overwrite or deletion.
+- Delete marker: Deleting an object without a version ID only adds a delete marker. Removing that marker restores the previous current version.
+- Version ID: Each version has a unique ID that can be used to restore or copy a known-good version.
+- Permanent delete: Deleting a specific version ID removes that version for good, so versioning should be combined with IAM permissions and lifecycle rules.
+- MFA Delete: An extra safeguard that requires multi-factor authentication to change versioning or permanently delete versions. It is set only through the AWS CLI, SDK or REST API.
+
+Key Takeaway
+Versioning protects S3 data from accidental deletion and corruption. Enable it on buckets that hold important data, and control who can permanently delete versions.

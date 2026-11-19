@@ -1,0 +1,37 @@
+Day 4 – Grant Execute Permission on a Shared Script (DevOps / Linux)
+
+Objective
+
+The xFusionCorp sysadmin team distributed a backup script, /tmp/xfusioncorp.sh, to all servers, but it lacks executable permissions on App Server 1 (stapp01) in the Stratos Datacenter. Grant execute permission and make sure every user can run it directly.
+
+Environment
+Server          Host       User    Access
+App Server 1    stapp01    tony    SSH from jump host (sudo access)
+
+Configuration Change
+File:          /tmp/xfusioncorp.sh
+Owner:         root:root
+Required mode: 755 (or a+rx), so that owner, group and others can read and execute
+
+Steps Performed
+1. Connected from the jump host: ssh tony@stapp01.
+2. Listed /tmp to inspect the file. It was owned by root with mode ---x--x--x, so it had execute permission but no read permission.
+3. Tried chmod as a normal user. It failed with "Operation not permitted", because only the owner (root) can change the mode.
+4. Granted read and execute to all users with sudo: sudo chmod a+rx /tmp/xfusioncorp.sh
+5. Verified the mode: ls -l /tmp/xfusioncorp.sh showed -r-xr-xr-x (555).
+6. Ran the script as tony: /tmp/xfusioncorp.sh, which printed "Welcome To KodeKloud".
+
+Troubleshooting
+- Running the script directly first returned "Permission denied" because the file had only execute permission.
+- Adding read permission fixed it. Shell scripts are plain text, and the interpreter (/bin/bash) must read the file before it can run it.
+
+Important Concepts Learned
+- Execute vs read on scripts: A compiled binary can run with execute-only permission, but a shell script needs both read and execute, because /bin/bash reads the text.
+- Permission classes: Owner, group and others. "a+rx" applies read and execute to all three.
+- chmod numbers: 755 gives the owner full access and everyone else read and execute. 555 removes write access for everyone, so non-root users cannot change the script.
+- Ownership: Only the file owner or root can change permissions, so sudo is needed here.
+
+Key Takeaway
+A script must be readable and executable to run. Use chmod with the right mode, verify with ls -l, and test as a normal user.
+
+Security Note: Mode 555 is safer than 755 for this script, because nobody can modify it, not even root without deliberate changes. Ensure the script itself is trusted before making it executable for all users.
