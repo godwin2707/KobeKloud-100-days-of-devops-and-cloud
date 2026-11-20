@@ -1,0 +1,25 @@
+Day 5 – Set SELinux to Disabled on App Server 3 (DevOps / Linux)
+
+Environment
+Server        Host       User     OS
+App Server 3  stapp03    banner   CentOS Stream 9 (RHEL family)
+
+Steps Performed
+1. Connected to stapp03 as banner.
+2. Confirmed the OS with cat /etc/os-release, which shows CentOS Stream 9. (cat /etc/osrelease returned "No such file or directory" because of a typo in the path.)
+3. Installed the SELinux policy and management packages:
+   sudo yum install -y policycoreutils policycoreutils-python-utils selinux-policy selinux-policy-targeted libselinux-utils setroubleshoot-server setools setools-console mcstrans
+4. Checked the installed packages with rpm -qa | grep -E "policycoreutils|selinux-policy". The output lists policycoreutils-3.6-9.el9, selinux-policy-38.1.87-1.el9 and selinux-policy-targeted-38.1.87-1.el9.
+5. Opened the SELinux config with sudo nano /etc/selinux/config and set SELINUX=disabled. SELINUXTYPE=targeted was left unchanged.
+
+Important Concepts Learned
+- SELinux (Security-Enhanced Linux): A kernel-level mandatory access control layer. It restricts each process to the files, folders and ports it is allowed to use, even when a user or service has root access.
+- Standard permissions vs SELinux: chmod and chown check who owns a file. SELinux also checks what program is accessing it, using labels (contexts) on processes and files.
+- SELINUX modes: enforcing (policy is enforced), permissive (violations are logged but allowed), disabled (no policy loaded).
+- SELINUXTYPE=targeted: Only targeted services are confined by policy.
+- Change timing: Edits to /etc/selinux/config take effect after a reboot. Setting disabled removes this protection layer, so enforcing or permissive mode is the more secure choice.
+
+Key Takeaway
+SELinux adds a containment layer on top of normal Linux permissions. Install its tools, edit /etc/selinux/config carefully, and remember that disabling it reduces security.
+
+Security Note: SELINUX=disabled removes SELinux protection from the server. Prefer enforcing mode unless a documented requirement says otherwise.

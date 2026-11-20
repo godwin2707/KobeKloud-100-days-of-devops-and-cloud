@@ -1,0 +1,32 @@
+Day 5 – Create and Verify an EBS gp3 Volume (AWS)
+
+Objective
+
+Create a general-purpose SSD (gp3) EBS volume named devops-volume, 2 GiB, and confirm it is available as a separate block device alongside the root volume.
+
+Configuration
+Setting            Value
+Volume Name        devops-volume
+Volume Type        General Purpose SSD (gp3)
+Size               2 GiB
+IOPS               3000
+Throughput         125 MiB/s
+Availability Zone  us-east-1a (use1-az4)
+
+Steps Performed
+1. Opened the AWS EC2 Console and navigated to Elastic Block Store -> Volumes.
+2. Clicked Create volume.
+3. Selected General Purpose SSD (gp3) as the volume type.
+4. Set size to 2 GiB, IOPS to 3000 and throughput to 125 MiB/s (the gp3 baseline).
+5. Selected the Availability Zone us-east-1a.
+6. Created the volume and confirmed it in the Volumes list as devops-volume, status gp3, 2 GiB.
+
+Important Concepts Learned
+- EBS (Elastic Block Store): Network block storage that EC2 instances use as disks.
+- gp3: General-purpose SSD. Its baseline is 3,000 IOPS and 125 MiB/s regardless of size, and IOPS and throughput can be raised independently of capacity, at lower per-GB cost than gp2.
+- Root volume vs additional volume: A new instance's root volume (8 GiB on Linux, 30 GiB on Windows by default) is untouched when a new volume is attached. The new volume appears as a separate block device, such as /dev/xvdf or /dev/nvme1n1 on Linux, and is mounted to a folder.
+- Delete on Termination: Off by default for additional volumes, so the data survives if the instance is terminated.
+- Availability Zone: An EBS volume can only attach to an instance in the same AZ.
+
+Key Takeaway
+gp3 volumes give predictable performance at lower cost. A volume must be created in the same Availability Zone as the instance it will be attached to, and attaching one leaves the root volume unchanged.
