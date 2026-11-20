@@ -19,6 +19,12 @@ Important Concepts Learned
 - SELINUXTYPE=targeted: Only targeted services are confined by policy.
 - Change timing: Edits to /etc/selinux/config take effect after a reboot. Setting disabled removes this protection layer, so enforcing or permissive mode is the more secure choice.
 
+Why SELinux Is Disabled in This Task
+- The lab asks for SELINUX=disabled so that configuration work can continue without SELinux blocking services unexpectedly.
+- SELinux enforces strict access rules. If policies are not tuned, it can block apps or configuration changes even when normal Linux permissions allow them.
+- Disabling it clears those blocks during setup and testing.
+- Trade-off: this removes a containment layer from the server. Permissive mode (logs violations without blocking) or fixing file labels and policy rules is the safer way to resolve the same blocks.
+
 Key Takeaway
 SELinux adds a containment layer on top of normal Linux permissions. Install its tools, edit /etc/selinux/config carefully, and remember that disabling it reduces security.
 
