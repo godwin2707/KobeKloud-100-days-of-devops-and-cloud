@@ -36,5 +36,14 @@ Important Concepts Learned
 - crontab -u <user> -e: Edits another user's crontab, which needs root or sudo.
 - Enabled vs active: "enabled" means the service starts at boot. "active (running)" means it is running now. A service can be enabled but inactive.
 
+Behaviour of sudo crontab -e
+- Opens the crontab of the root user, not the user who runs the command, so "sudo" changes the target.
+- Each user has their own crontab file. When none exists yet, crontab creates an empty one on save ("no crontab for root - using an empty one", then "crontab: installing new crontab").
+- The file opens in the default editor (nano or vi). It is a temporary copy such as /tmp/crontab.XXXXXX, which is installed as the real crontab when you save and exit.
+- Lines are checked when saved, so a syntax error is reported before the file is installed.
+- The entry runs as root, which is why /tmp/cron_text on stapp03 is owned by root:root.
+- Without sudo, crontab -e edits your own crontab. steve's crontab -l showed "no crontab for steve" because the entry went into root's crontab.
+- crontab -l with sudo lists root's crontab, and crontab -u <user> -e edits another user's crontab.
+
 Key Takeaway
 A cron job only runs if the crond service is active. Check that the package is installed and the service is running, then verify the output file.
