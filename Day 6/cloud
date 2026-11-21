@@ -28,5 +28,13 @@ Important Concepts Learned
 - RSA vs ED25519: Both are key types. RSA is the widely supported default for this task.
 - Default security group: Allows all traffic between instances in the group, and all outbound traffic. Inbound traffic from elsewhere is blocked unless rules are added.
 
+Default Security Group – Inbound Traffic
+- Accepts inbound traffic only from resources that belong to the same security group (self-reference, sg-03054231ff1937dd9).
+- All other sources are blocked, including your computer and the internet, so SSH (22) and HTTP (80) must be added as rules.
+- Example: an instance db-server in the same default group (172.31.22.40) can reach datacenter-ec2 (172.31.20.15) on any port. A laptop at 103.21.x.x cannot reach it on port 22 until a rule allows it.
+- An instance in a different security group cannot reach datacenter-ec2 unless a rule allows that group.
+- Outbound traffic is allowed to all destinations by default.
+- To allow SSH from your computer, add an inbound rule for TCP 22 with source "My IP". Avoid 0.0.0.0/0 for SSH.
+
 Key Takeaway
 Launching an EC2 instance needs an AMI, an instance type, a key pair for login, and a security group. Keep the private key safe, because AWS does not keep a copy.
