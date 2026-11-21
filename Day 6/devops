@@ -1,0 +1,40 @@
+Day 6 – Schedule a Recurring Job with Cron (DevOps / Linux)
+
+Objective
+
+Schedule a job that runs every 5 minutes and writes "hello" to /tmp/cron_text, on each app server in the Stratos Datacenter, and make sure the cron service is running.
+
+Environment
+Server         Host       User     Notes
+App Server 1   stapp01    tony     cronie not installed at start
+App Server 2   stapp02    steve    crond inactive at start
+App Server 3   stapp03    banner   verification only
+
+Cron Entry (added to root's crontab)
+*/5 * * * * echo hello > /tmp/cron_text
+
+Steps Performed
+1. On stapp01, checked for cron with rpm -q cronie. The package was not installed.
+2. Installed it with sudo yum install cronie.
+3. Opened root's crontab with sudo crontab -e and added the entry above.
+4. Verified with sudo crontab -l.
+5. Checked the service with sudo systemctl status crond. It was enabled but inactive (dead).
+6. Started it with sudo systemctl start crond and confirmed it was active (running).
+7. Repeated steps 3 to 6 on stapp02 as steve. Here crond was already installed. Running crontab -l as steve showed "no crontab for steve", so the entry went into root's crontab via sudo.
+8. Checked stapp01 with cat /tmp/cron_text, which printed "hello".
+9. Checked stapp03 with ls -ls /tmp/cron_text. The file is owned by root:root, which shows the job runs as root.
+
+Troubleshooting
+- sudo systemctl crond status returned "Unknown command verb crond." The verb must come before the unit name: systemctl status crond.
+- crond was enabled but not running on stapp01 and stapp02, so the job would not have run until it was started.
+
+Important Concepts Learned
+- Cron: A scheduler that runs commands at set times, defined by five fields: minute, hour, day of month, month, day of week.
+- */5 * * * *: Means every 5 minutes, at minutes 0, 5, 10 and so on, every hour, every day.
+- crontab -l: Lists the current crontab without opening an editor.
+- crontab -e: Opens the crontab in an editor. -r removes the whole crontab.
+- crontab -u <user> -e: Edits another user's crontab, which needs root or sudo.
+- Enabled vs active: "enabled" means the service starts at boot. "active (running)" means it is running now. A service can be enabled but inactive.
+
+Key Takeaway
+A cron job only runs if the crond service is active. Check that the package is installed and the service is running, then verify the output file.

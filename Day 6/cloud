@@ -1,0 +1,32 @@
+Day 6 – Launch an EC2 Instance with a New Key Pair (AWS)
+
+Objective
+
+The Nautilus DevOps team is migrating part of its infrastructure to AWS in small, incremental steps. This task launches the first EC2 instance, datacenter-ec2, with the required settings.
+
+Configuration
+Setting            Value
+Instance Name      datacenter-ec2
+AMI                Amazon Linux
+Instance Type      t2.micro (1 vCPU, 1 GiB memory)
+Key Pair           datacenter-kp (RSA)
+Security Group     default (sg-03054231ff1937dd9)
+
+Steps Performed
+1. Opened the AWS EC2 Console and clicked Launch instance.
+2. Entered datacenter-ec2 as the instance name.
+3. Selected the Amazon Linux AMI from Quick Start.
+4. Selected t2.micro as the instance type.
+5. Created a new RSA key pair named datacenter-kp and selected it for login.
+6. Under Firewall (security groups), chose Select existing security group and added the default security group.
+7. Launched the instance.
+
+Important Concepts Learned
+- AMI (Amazon Machine Image): The template that defines the operating system and software an instance starts with.
+- Instance type: t2.micro is a small burstable type in the AWS free tier, with 1 vCPU and 1 GiB memory.
+- Key pair: A public key stored by AWS and a private key you download once. The private key is what you use to SSH into the instance, so keep it safe.
+- RSA vs ED25519: Both are key types. RSA is the widely supported default for this task.
+- Default security group: Allows all traffic between instances in the group, and all outbound traffic. Inbound traffic from elsewhere is blocked unless rules are added.
+
+Key Takeaway
+Launching an EC2 instance needs an AMI, an instance type, a key pair for login, and a security group. Keep the private key safe, because AWS does not keep a copy.
