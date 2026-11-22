@@ -1,0 +1,33 @@
+Day 7 – Set Up Passwordless SSH from the Jump Host (DevOps / Linux)
+
+Objective
+
+The xFusionCorp system admins run scripts on the jump host that operate on all app servers in the Stratos Datacenter. To make these scripts work, the thor user on the jump host needs passwordless SSH access to each app server through its sudo user.
+
+Environment
+Server         Host       Login User   Notes
+App Server 1   stapp01    tony         sudo user
+App Server 2   stapp02    steve        sudo user
+App Server 3   stapp03    banner       sudo user
+Jump host      jump-host  thor         source of the key
+
+Steps Performed
+1. Logged in to jump-host as thor.
+2. Generated an RSA key pair with ssh-keygen -t rsa. Accepted the default path /home/thor/.ssh/id_rsa and left the passphrase empty, so scripts can run unattended.
+3. Copied the public key to tony@stapp01 with ssh-copy-id tony@stapp01. Accepted the host fingerprint and entered the password once.
+4. Confirmed the login: ssh tony@stapp01 opened a shell without a password prompt.
+5. Repeated step 3 for steve@stapp02. After the copy, ssh steve@stapp02 logged in without a password and exit closed the connection cleanly.
+6. Repeated step 3 for banner@stapp03. The first two ssh attempts were cancelled with Ctrl+C (they were waiting for input). The third attempt connected without a password.
+
+Important Concepts Learned
+- Key-based authentication: The private key stays on the jump host. Only the public key is copied to each server, and the server checks that the login proves possession of the private key.
+- ssh-keygen -t rsa: Creates a key pair. An empty passphrase lets scripts log in without interaction, but the private key then needs strict file permissions (600) and its own protection.
+- ssh-copy-id: Appends the public key to ~/.ssh/authorized_keys on the remote user's account and sets the right permissions.
+- Host fingerprint: On first connection, SSH asks to trust the server's fingerprint. Accepting it stores the host in known_hosts, so later connections are verified.
+- Sudo users: The keys are installed for tony, steve and banner, the users that have sudo, rather than for root.
+
+Troubleshooting
+- Two ssh banner@stapp03 attempts hung at a "> " prompt. This was an unclosed quote in the command (ssh 'banner@stapp03). Typing the closing quote fixed it.
+
+Key Takeaway
+Passwordless SSH lets scripts run from a jump host without storing passwords. Create one key pair on the jump host, copy the public key to each server, and verify each login before relying on scripts.

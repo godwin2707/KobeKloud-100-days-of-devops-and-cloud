@@ -1,0 +1,32 @@
+Day 7 – Change an EC2 Instance Type (AWS)
+
+Objective
+
+Optimize resource usage by changing the instance type of nautilus-ec2 from t2.micro to t2.nano.
+
+Configuration
+Setting                 Value
+Instance Name           nautilus-ec2
+Instance ID             i-0a2b5906251cd8c00
+Availability Zone       us-east-1d
+Original Instance Type  t2.micro
+New Instance Type       t2.nano
+On-Demand Linux price   t2.micro 0.0116 USD/hour, t2.nano 0.0058 USD/hour
+
+Steps Performed
+1. Opened the EC2 Console and selected the instance nautilus-ec2 (Stopped).
+2. Opened Actions -> Instance settings -> Change instance type.
+3. Confirmed the current instance type was t2.micro.
+4. Selected t2.nano as the new instance type. The console showed the price comparison.
+5. Applied the change.
+6. Started the instance from Instance state. It moved from Stopped to Running, with status checks Initializing.
+
+Important Concepts Learned
+- Changing an instance type requires a stop: The instance must be stopped before its type can be changed. Stopping and starting also can change the public IP unless an Elastic IP is attached.
+- Instance type sizing: t2.nano has 1 vCPU and 0.5 GiB memory. t2.micro has 1 vCPU and 1 GiB memory. Right-sizing reduces cost for workloads that do not need the extra memory.
+- Compatibility: The new type must match the architecture (x86 or ARM) of the AMI. The console only offers compatible types.
+- Burstable (T-series) instances: They use CPU credits. Running out of credits limits CPU performance.
+- Data retention: Instance store data is lost when an instance is stopped, but EBS-backed root volumes are kept.
+
+Key Takeaway
+Changing the instance type is a stop-change-start operation. Choose the smallest type that meets the workload, because the cost difference is shown in the console before you change it.
