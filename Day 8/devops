@@ -1,0 +1,26 @@
+Day 8 – Install Ansible 4.7.0 Globally on the Jump Host (DevOps / Linux)
+
+Objective
+
+The Nautilus DevOps team chose Ansible as its configuration management tool. The jump host is the Ansible controller. Install Ansible version 4.7.0 using pip3, and make the ansible binary available globally so every user on the system can run it.
+
+Environment
+Server      Host        User    Notes
+Jump host   jump-host   thor    Ansible controller
+
+Steps Performed
+1. Logged in to jump-host as thor.
+2. Installed the pinned version system-wide with pip3: sudo pip3 install ansible==4.7.0
+   - pip downloaded ansible-4.7.0.tar.gz (36 MB) and ansible-core 2.11.12 as a dependency.
+   - Existing dependencies (jinja2, PyYAML, cryptography, packaging) were already satisfied.
+3. Ran ansible --version as thor. It reported ansible [core 2.11.12], executable location /usr/local/bin/ansible, and Python 3.9.19.
+
+Important Concepts Learned
+- Ansible: An agentless automation tool. It connects to servers over SSH and runs modules, so no agent is needed on managed hosts.
+- Ansible version naming: The package "ansible" 4.x bundles ansible-core, which reports its own version (2.11.12 here).
+- Global install: sudo pip3 installs into the system Python, and the binary goes to /usr/local/bin. This is on every user's PATH, which is what "available globally" requires.
+- Version pinning: ansible==4.7.0 installs exactly that release, so every engineer and service account gets the same behavior.
+- Installing with sudo pip3 can conflict with OS-managed Python packages. A shared virtual environment in /opt, with symlinks in /usr/local/bin, is a safer approach on production jump servers.
+
+Key Takeaway
+A shared jump host needs one pinned Ansible install that every user can run. Install it system-wide with pip3, pin the version, and confirm from a normal user account with ansible --version.

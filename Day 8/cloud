@@ -1,0 +1,29 @@
+Day 8 – Enable Stop Protection on an EC2 Instance (AWS)
+
+Objective
+
+Protect the instance datacenter-ec2 from being stopped by mistake by enabling stop protection.
+
+Configuration
+Setting            Value
+Instance Name      datacenter-ec2
+Instance ID        i-0a88d2a94db9ae0e8
+Instance Type      t2.micro
+Availability Zone  us-east-1c
+Stop Protection    Enabled
+
+Steps Performed
+1. Opened the EC2 Console and selected datacenter-ec2 (Running, 2/2 checks passed after initialization).
+2. Opened Actions -> Instance settings -> Change stop protection.
+3. Ticked Enable and clicked Save.
+4. Confirmed the banner "Enabled stop protection for i-0a88d2a94db9ae0e8".
+
+Important Concepts Learned
+- Stop protection (DisableApiStop): When enabled, AWS rejects StopInstances requests from the console, CLI and SDK with OperationNotPermitted until the setting is turned off. It prevents accidental stops, not every shutdown.
+- Shutdown methods: A console, CLI or SDK stop is blocked. An OS-level command such as sudo shutdown -h now still stops the guest OS, and the instance moves to stopped. Reboots are not affected.
+- Termination protection (DisableApiTermination): A separate setting, disabled by default. It blocks API termination but not terminations from Auto Scaling, Spot interruptions, or shutdown behavior set to terminate.
+- Not a security boundary: Anyone with ec2:ModifyInstanceAttribute permission can turn either protection off. Use IAM policies and CloudTrail monitoring to enforce access.
+- When to use: Common for long-lived, manually managed production servers. Stateless, auto-scaling workloads usually leave both protections off, because they interfere with automation.
+
+Key Takeaway
+Stop protection is a guardrail against accidental stops, not a substitute for IAM controls. Enable it on manually managed production instances, and remember that OS-level shutdowns still work.
