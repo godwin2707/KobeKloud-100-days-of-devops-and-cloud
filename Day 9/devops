@@ -1,0 +1,40 @@
+Day 9 – Fix the MariaDB Service on the Database Server (DevOps / Linux)
+
+Objective
+
+The Nautilus application in the Stratos DC cannot connect to the database. The production support team found that the mariadb service is down on the database server stdb01. Investigate the failure and bring the service back up.
+
+Environment
+Server       Host     User    Notes
+DB server    stdb01   peter   MariaDB 10.5, sudo user
+Jump host    jump-host thor   Used to reach stdb01 over SSH
+
+Steps Performed
+1. From jump-host as thor, connected to the database server: ssh peter@stdb01. Accepted the host key (ED25519) and logged in.
+2. Tried the local client: mariadb returned "ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/lib/mysql/mysql.sock'", which confirmed the server was not running.
+3. Checked the service: sudo systemctl status mariadb showed "Loaded: ... disabled; preset: disabled" and "Active: inactive (dead)".
+4. Started it with sudo systemctl start mariadb. The job failed with "the control process exited with error code".
+5. Read the detailed status and logs. The mariadb-prepare-db-dir step failed with status=1/FAILURE. The log said the database was not initialized but /var/lib/mysql was not empty, so initialization could not be done.
+6. Checked the data directory with ls -la /var/lib/mysql, which returned "No such file or directory".
+7. Found the configured data directory with grep -rn "datadir" /etc/my.cnf.d/ /etc/mysql/. The setting was datadir=/var/lib/mysql in /etc/my.cnf.d/mariadb-server.cnf.
+8. Created the directory: sudo mkdir -p /var/lib/mysql.
+9. Set the owner to the mysql user so the service can write to it: sudo chown -R mysql:mysql /var/lib/mysql.
+10. Started the service: sudo systemctl start mariadb. Verified with sudo systemctl status mariadb, which showed "active (running)" with ExecStartPost check-upgrade succeeding.
+11. Confirmed mariadbd (user mysql) in top, and the directory contents in /var/lib/mysql (ibdata1, mysql.sock, aria logs and others).
+
+Important Concepts Learned
+- systemd "disabled" vs "inactive": Disabled means the service will not start at boot. Inactive means it is not running now. The Day 6 notes cover the same distinction for crond.
+- Data directory: /var/lib/mysql holds the databases, the system schema, InnoDB files and the socket. It is owned by the mysql system user, and the service cannot write to it unless the owner is correct.
+- mariadb-prepare-db-dir: The pre-start script that initializes the data directory on first run. It refuses to run if the directory exists and is not empty, and it fails if the directory is missing.
+- Finding config: grep datadir in /etc/my.cnf.d and /etc/mysql shows where the server expects its data.
+- Permissions: mkdir -p creates missing parents without error, and chown -R applies ownership to the directory and everything inside it.
+- Don't delete the data directory: Removing or editing files inside /var/lib/mysql by hand can corrupt databases. Use mysqldump or a proper backup for changes.
+
+Troubleshooting
+- The first failure message said the directory was not empty. A later check showed /var/lib/mysql did not exist, so the message and the directory state didn't match. Checking the configured datadir first (step 7) resolved the confusion.
+- The service failed to start until the datadir existed and was owned by mysql.
+
+Key Takeaway
+When MariaDB fails to start, read the systemd status and journal, check the configured datadir, and confirm the directory exists and belongs to the mysql user before restarting.
+
+Security Note: The MariaDB root account has no password on a fresh install. Set one and secure the installation before exposing the database to the application.

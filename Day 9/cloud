@@ -1,0 +1,29 @@
+Day 9 – Enable Termination Protection on an EC2 Instance (AWS)
+
+Objective
+
+During the migration, the Nautilus DevOps team created an EC2 instance without termination protection. Enable termination protection on nautilus-ec2 in us-east-1.
+
+Configuration
+Setting                 Value
+Instance Name           nautilus-ec2
+Instance ID             i-027a346c4148ed26f
+Instance Type           t2.micro
+Availability Zone       us-east-1a
+Termination Protection  Enabled
+
+Steps Performed
+1. Opened the EC2 Console and filtered instances by Instance state = running.
+2. Selected nautilus-ec2.
+3. Opened Actions -> Instance settings -> Change termination (deletion) protection.
+4. Ticked Enable and clicked Save.
+5. Confirmed the banner "Successfully enabled termination protection for instance i-027a346c4148ed26f. The instance can't be deleted."
+
+Important Concepts Learned
+- Termination protection (DisableApiTermination): Blocks termination of the instance through the console, CLI and API until the setting is turned off.
+- It does not block everything: OS-initiated shutdowns with shutdown behavior set to terminate, Auto Scaling terminations and Spot interruptions still terminate the instance.
+- Stop protection is separate. It prevents stopping, not deleting. Both can be enabled together.
+- Not a security boundary: Anyone with ec2:ModifyInstanceAttribute permission can turn it off, so IAM policies and CloudTrail monitoring are still needed.
+
+Key Takeaway
+Termination protection guards against accidental deletion of important instances. Enable it on any instance that holds non-replaceable data or serves production traffic, and check it on instances created outside the standard process.
