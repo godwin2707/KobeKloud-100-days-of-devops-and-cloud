@@ -1,0 +1,44 @@
+Day 10 – Automate a Website Media Archive with a Bash Script (DevOps / Linux)
+
+Objective
+
+The xFusionCorp production support team needs a script that archives the static website media on App Server 2 and copies the archive to the Nautilus Storage Server. The script is named media_archive.sh, placed in /scripts on stapp02, and must run without a password prompt and without sudo.
+
+Environment
+Server          Host       User      Role
+App Server 2    stapp02    steve     Runs the script
+Storage Server  ststor01   natasha   Receives the archive in /archives/
+
+Script (/scripts/media_archive.sh)
+#!/bin/bash
+
+zip -r /archives/xfusioncorp_media.zip /var/www/html/media
+scp /archives/xfusioncorp_media.zip natasha@ststor01:/archives/
+
+Steps Performed
+1. Logged in to stapp02 as steve and went to /scripts.
+2. Generated an RSA key pair for steve with ssh-keygen -t rsa, using the default path /home/steve/.ssh/id_rsa and an empty passphrase so the script can run unattended.
+3. Copied the public key to the storage server: ssh-copy-id natasha@ststor01. Entered natasha's password once, which installed 1 key.
+4. Confirmed passwordless login: ssh natasha@ststor01 connected without a password prompt, and exit closed the connection.
+5. Created the script with nano, with the content above.
+6. Made it executable and ran it: ./media_archive.sh. zip added var/www/html/media, index.html and .gitkeep into xfusioncorp_media.zip (595 bytes).
+7. Checked /archives on stapp02 and on ststor01. Both contain xfusioncorp_media.zip.
+8. Set ownership and permissions so steve owns the script and archive: sudo chown steve:steve /scripts/media_archive.sh, sudo chown -R steve:steve /archives/, then chmod 755 media_archive.sh.
+
+Troubleshooting
+- Running media_archive.sh without ./ returned "command not found", because the current directory is not on PATH. Run it as ./media_archive.sh.
+- The first ./media_archive.sh attempt ran from the scripts directory, so the output file was created in /archives correctly.
+- The zip command succeeded, so the zip package was already installed on stapp02. The package installation was not part of the screenshots.
+
+Important Concepts Learned
+- Shell script: A text file starting with #!/bin/bash that runs a list of commands in order.
+- Executable bit: chmod 755 gives the owner read, write and execute, and others read and execute. Without it, the script cannot run directly.
+- zip -r: Recursively adds a directory and its contents to an archive. The archive path comes first, then the source.
+- scp: Copies files over SSH. Passwordless scp uses the key set up for steve, so the script runs unattended.
+- No sudo in scripts: Commands run with the permissions of the user who starts them, so the script itself stays least-privilege.
+- Path on PATH: Scripts in the current directory are not run by name alone unless "./" is used.
+
+Key Takeaway
+A cron-friendly backup script needs three things: a key-based login for the user who runs it, the right zip and scp commands, and the correct ownership and executable bit. Test it by running it as that user and checking both ends.
+
+Security Note: The key has an empty passphrase, so anyone who can read /home/steve/.ssh/id_rsa can log in to the storage server as natasha. Restrict the key file to mode 600 and limit what natasha's account can do.

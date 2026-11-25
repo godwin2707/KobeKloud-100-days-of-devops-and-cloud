@@ -1,0 +1,33 @@
+Day 10 – Associate an Elastic IP with an EC2 Instance (AWS)
+
+Objective
+
+The Nautilus DevOps team needs a fixed public IP address for datacenter-ec2. Attach the existing Elastic IP datacenter-ec2-eip to the instance datacenter-ec2 in the us-east-1 region.
+
+Configuration
+Setting                  Value
+Elastic IP Name          datacenter-ec2-eip
+Elastic IP Address       52.205.189.66
+Allocation ID            eipalloc-034c38c3cd7c2052f
+Instance Name            datacenter-ec2
+Instance ID              i-03642055caaadbe17
+Instance Type            t2.micro
+Availability Zone        us-east-1a
+Private IPv4             172.31.94.93
+
+Steps Performed
+1. Opened the EC2 Console and went to Network & Security -> Elastic IPs.
+2. Selected datacenter-ec2-eip and opened Actions -> Associate Elastic IP address.
+3. Set Resource type to Instance and selected i-03642055caaadbe17 (datacenter-ec2).
+4. Left the private IP blank, so the Elastic IP attaches to the primary private IP (172.31.94.93).
+5. Left "Allow this Elastic IP address to be reassociated" unticked, since the address was not associated with anything else.
+6. Clicked Associate and confirmed the banner "Elastic IP address associated successfully" for 52.205.189.66 -> i-03642055caaadbe17.
+
+Important Concepts Learned
+- Elastic IP (EIP): A static public IPv4 address that stays with your account until you release it. A normal public IP changes when an instance is stopped and started.
+- Association: An EIP can be attached to an instance or to a network interface. Associating an EIP with an instance that already has one replaces the old address, which is then released from the instance but kept in the account.
+- Reassociation flag: Prevents an EIP already in use from being moved without a deliberate choice.
+- Charges: AWS charges for an EIP that is allocated but not associated with a running instance, so detach or release unused addresses.
+
+Key Takeaway
+An Elastic IP gives an instance a stable public address. Associate it with the instance's primary private IP, and keep in mind that unattached EIPs are billed.
