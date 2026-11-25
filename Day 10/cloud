@@ -29,5 +29,10 @@ Important Concepts Learned
 - Reassociation flag: Prevents an EIP already in use from being moved without a deliberate choice.
 - Charges: AWS charges for an EIP that is allocated but not associated with a running instance, so detach or release unused addresses.
 
+Private IP vs Elastic IP
+- Private IPv4 (172.31.94.93): The address the instance uses inside its VPC. It is assigned from the subnet's range and is not reachable from the internet. Other instances in the VPC use it to talk to this one.
+- Public IPv4 / Elastic IP (52.205.189.66): The internet-facing address. An Elastic IP is a static public address that AWS maps to the instance's private IP through NAT on the internet gateway.
+- Leaving "Private IP address" blank attaches the Elastic IP to the instance's primary private IP. Choose a specific private IP only when the instance has a secondary private IP or more than one network interface and the Elastic IP must map to that one.
+
 Key Takeaway
 An Elastic IP gives an instance a stable public address. Associate it with the instance's primary private IP, and keep in mind that unattached EIPs are billed.

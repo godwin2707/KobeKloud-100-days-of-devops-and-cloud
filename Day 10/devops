@@ -38,6 +38,19 @@ Important Concepts Learned
 - No sudo in scripts: Commands run with the permissions of the user who starts them, so the script itself stays least-privilege.
 - Path on PATH: Scripts in the current directory are not run by name alone unless "./" is used.
 
+Shebang (#!/bin/bash) and Running Scripts
+- The first line, #!/bin/bash, is the shebang. When a file is run directly, the kernel reads it and starts the interpreter named after #!. Without it, the shell may run the file with the wrong interpreter, or the script can fail if your login shell is different (for example zsh or sh).
+- Use #!/bin/bash for bash-specific syntax such as arrays, [[ ]] tests, and $(...) with bash features.
+- Use #!/bin/sh for portable scripts that only use POSIX features, because /bin/sh is the shell that scripts must work with on any system.
+- Scripts run by cron or ./script.sh depend on the shebang, so always include it.
+
+Absolute vs Relative Paths
+- /scripts/media_archive.sh is an absolute path. It always refers to the file in the /scripts folder at the root of the filesystem, so it works from any folder.
+- ./scripts/media_archive.sh is a relative path. It refers to a scripts folder inside the current directory. From / it is the same file as /scripts/media_archive.sh, but from any other folder it points somewhere else or does not exist.
+- ./media_archive.sh runs the file in the current directory. The ./ tells the shell to look here, because the current directory is not on PATH.
+- Both absolute and relative forms run the file directly only if it has the executable bit (chmod 755 or chmod +x).
+- Running media_archive.sh by name alone gives "command not found", because the shell searches only the directories in PATH.
+
 Key Takeaway
 A cron-friendly backup script needs three things: a key-based login for the user who runs it, the right zip and scp commands, and the correct ownership and executable bit. Test it by running it as that user and checking both ends.
 
