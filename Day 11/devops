@@ -1,0 +1,44 @@
+Day 11 – Deploy a Java Web App on Apache Tomcat (DevOps / Linux)
+
+Objective
+
+The Nautilus application development team finished a beta Java web application and wants to deploy it on App Server 2 (stapp02) using Apache Tomcat. Install Tomcat, configure it to listen on port 5000, deploy ROOT.war from the jump host's /tmp, and confirm the page loads at http://stapp02:5000.
+
+Environment
+Server        Host       User     Role
+App Server 2  stapp02    steve    Tomcat host
+Jump host     jump-host  thor     Holds ROOT.war in /tmp
+
+Steps Performed
+1. Logged in to stapp02 as steve.
+2. Installed Tomcat: sudo yum install tomcat. Verified it with tomcat version, which reported Apache Tomcat 9.0.123 running on JVM 11.0.20.1 (Red Hat).
+3. Confirmed Java with java -version: OpenJDK 11.0.20.1 (Red Hat build).
+4. Checked the service user with cat /etc/passwd. The tomcat account is a system user (uid 53) with no login shell.
+5. Looked at the config files in /etc/tomcat with ls -l. Owner root, group tomcat.
+6. Edited the HTTP connector port in /etc/tomcat/server.xml with sudo nano, changing port 8080 to port="5000".
+7. Copied the WAR from the jump host: as thor on jump-host, scp /tmp/ROOT.war steve@stapp02:/tmp/. The first attempt went to stapp01 and was cancelled, then the command was rerun to stapp02.
+8. Moved the WAR into the webapps folder. The plain mv was denied because /usr/share/tomcat/webapps is owned by root, so it was done with sudo mv /tmp/ROOT.war /usr/share/tomcat/webapps/.
+9. Set ownership so Tomcat can read and deploy the WAR: sudo chown tomcat:tomcat /usr/share/tomcat/webapps/ROOT.war. It now shows -rw-r--r-- tomcat tomcat.
+10. Started the service: sudo systemctl start tomcat.
+11. Tested locally with curl http://127.0.0.1:5000. It returned the SampleWebApp page with the heading "Welcome to xFusionCorp Industries!".
+
+Important Concepts Learned
+- Apache Tomcat: A servlet container that runs Java web apps packaged as WAR files.
+- ROOT.war: Deploying a WAR named ROOT puts the app at the base URL (/), so http://stapp02:5000 serves it directly without a context path.
+- Connector port: The HTTP connector in server.xml decides which port Tomcat listens on. The default is 8080.
+- CATALINA_HOME layout: /usr/share/tomcat holds the runtime, /etc/tomcat holds configuration, /var/log/tomcat holds logs, and webapps is where deployments go.
+- Tomcat auto-deploy: Tomcat unpacks and deploys a WAR placed in webapps, but it can only read files it owns or can access. Ownership matters.
+- Ports below 1024 need root, so 5000 works for the tomcat user without extra privileges.
+
+Troubleshooting
+- mv into /usr/share/tomcat/webapps failed with "Permission denied", since the folder is owned by root. Using sudo fixed it.
+- The WAR was owned by steve after the move, so the chown to tomcat:tomcat was needed before Tomcat could deploy it.
+- The scp went to stapp01 by mistake on the first try. Rerun it against stapp02.
+
+Important Concepts Learned (continued)
+- Verify locally before testing from outside: curl 127.0.0.1 proves Tomcat serves the page. A failure from another host then points to firewall or network rules rather than Tomcat.
+
+Key Takeaway
+Deploying a WAR on Tomcat needs three things: the connector port set in server.xml, the WAR in webapps with the tomcat owner, and the service started. Test with curl on the server first.
+
+Security Note: The default tomcat-users.xml and manager apps are not part of this task. If the manager app is installed, restrict access or remove it.

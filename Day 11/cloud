@@ -1,0 +1,37 @@
+Day 11 – Attach an Elastic Network Interface to an EC2 Instance (AWS)
+
+Objective
+
+The Nautilus team needs a second network interface on the instance xfusion-ec2. Attach the existing ENI xfusion-eni to it.
+
+Configuration
+Setting                  Value
+Instance Name            xfusion-ec2
+Instance ID              i-0f6f11334ae4d40dd
+Instance Type            t2.micro
+Availability Zone        us-east-1a
+ENI Name                 xfusion-eni
+ENI ID                   eni-0bb9f499a3e90e034
+ENI Private IPv4         172.31.6.93
+ENI Subnet               subnet-01a367290febcb061
+VPC                      vpc-0404850697cac801b
+Security group           default
+Primary ENI (device 0)   eni-0c8feaba86c7cb334, 172.31.1.189
+
+Steps Performed
+1. Opened the EC2 Console and went to Network & Security -> Network Interfaces.
+2. Confirmed xfusion-eni (eni-0bb9f499a3e90e034) is in us-east-1a, in the same VPC and subnet as the instance, with private IP 172.31.6.93 and no public IP.
+3. Selected xfusion-eni and opened Actions -> Attach.
+4. Selected instance i-0f6f11334ae4d40dd (xfusion-ec2) and clicked Attach.
+5. Checked the instance's Networking tab. It now lists two network interfaces: eni-0c8feaba86c7cb334 at device index 0 (primary) and eni-0bb9f499a3e90e034 (xfusion-eni) at device index 1, private IP 172.31.6.93.
+
+Important Concepts Learned
+- Elastic Network Interface (ENI): A virtual network card in a VPC. It holds its own private IPs, MAC address, security groups and optional Elastic IP, and can be attached to or moved between instances.
+- Same AZ and subnet: An ENI can attach only to an instance in the same Availability Zone. Its subnet must be in the same VPC as the instance.
+- Device index: The primary ENI is device index 0 and cannot be detached. Additional ENIs take 1, 2 and so on.
+- Multiple IPs per interface: An ENI can hold a primary private IP, secondary private IPs, IPv6 addresses and a public or Elastic IP.
+- Portability: The private IP, MAC address, security groups and Elastic IP move with the ENI, so moving it to a standby instance keeps the same network identity.
+- Instance type limit: The number of ENIs an instance can hold depends on its type. t2.micro supports 2.
+
+Key Takeaway
+An ENI is a movable network identity. Attach one in the same AZ and VPC as the instance, and check the Networking tab to confirm the device index and private IP.
