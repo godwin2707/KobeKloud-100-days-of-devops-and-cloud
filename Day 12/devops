@@ -1,0 +1,44 @@
+Day 12 – Fix Apache Unreachable on Port 8086 (DevOps / Linux)
+
+Objective
+
+The monitoring tool reported that the Apache service on one app server (Stratos Datacenter) is not reachable on port 8086. Find the faulty app server, fix the cause without stopping the firewall or flushing its rules, and make Apache answer on port 8086 from the jump host. Do not change the website content in /var/www/html.
+
+Environment
+Server        Host       User     Role
+App Server 1  stapp01    tony     Faulty app server
+Jump host     jump-host  thor     Used to test with curl
+
+Steps Performed
+1. Tested from the jump host: curl http://stapp01:8086 failed with "Failed to connect to stapp01 port 8086: No route to host".
+2. Logged in to stapp01 as tony and checked Apache: sudo systemctl status httpd showed the service as failed. The journal showed "Address already in use" errors for port 8086.
+3. Checked listening ports with sudo ss -tuln and sudo ss -tulnp. Port 8086 on 127.0.0.1 was held by sendmail (pid 35126).
+4. Reviewed processes with ps aux. Killing a sendmail process with a plain kill returned "Operation not permitted", so sudo kill was used. The queue runner (pid 35365) stopped, but the root sendmail process (pid 35126) still held port 8086.
+5. Stopped the root sendmail process with sudo kill 35126. ss -tulnp then showed port 8086 free, with only ttyd on 8080 and sshd on 22 still listening.
+6. Started Apache with sudo systemctl start httpd. The status changed to active (running) and the log showed "Server configured, listening on: port 8086".
+7. Tested from the jump host again: curl http://stapp01:8086 still returned "No route to host". sudo iptables -L -n -v --line-numbers showed that Rule 5 (REJECT all, icmp-host-prohibited) in the INPUT chain was blocking the traffic. Rule 4 only allowed port 22.
+8. Added an ACCEPT rule for tcp port 8086 above the REJECT rule: sudo iptables -I INPUT 5 -p tcp --dport 8086 -j ACCEPT. A plain iptables command as tony failed with "Can't open lock file /run/xtables.lock: Permission denied", so the command was run with sudo.
+9. Tried to persist the rule with service iptables save. The command was not found, because the iptables-services package is not installed on this CentOS Stream host. Saved the ruleset with iptables-save > /etc/sysconfig/iptables as root and checked the file with cat.
+10. Verified the rule order with sudo iptables -L -n -v --line-numbers. The new tcp dpt:8086 ACCEPT rule sat before the REJECT rule.
+11. Tested from the jump host with curl -I http://stapp01:8086. The response was HTTP/1.1 403 Forbidden from Apache/2.4.62 (CentOS Stream). The 403 shows the port is reachable and Apache is answering. It is a separate issue from the connection failure.
+
+Troubleshooting
+- Apache failed to start with "Address already in use" on port 8086. The cause was the sendmail process bound to 127.0.0.1:8086. Stopping that process freed the port.
+- A plain kill returned "Operation not permitted" because the process belonged to root. Using sudo fixed it.
+- The first sudo kill on pid 35365 did not clear the conflict. The conflict was a second sendmail process (pid 35126). Always re-check with ss -tulnp after killing a process.
+- "No route to host" came from the REJECT rule in INPUT, not from Apache. A new rule has to be inserted above the REJECT rule. Appending with -A puts it after the REJECT and it never matches.
+- iptables could not be run as tony without sudo because of the lock file permission.
+- A typo in the save path (/etc/sysconfig/iptable) returned "No such file or directory". The correct path is /etc/sysconfig/iptables.
+
+Important Concepts Learned
+- SIGTERM vs SIGKILL: kill sends SIGTERM by default, which lets a process clean up. kill -9 sends SIGKILL, which the kernel enforces without any cleanup. SIGTERM is the safer first choice, and SIGKILL is the fallback for a process that ignores SIGTERM.
+- Port conflicts: Only one process can bind a given address and port at a time. A process bound to 127.0.0.1:8086 still blocks a service that tries to bind 0.0.0.0:8086.
+- iptables chain order: Rules are checked from top to bottom, and the first match wins. A REJECT rule above an ACCEPT rule blocks the traffic.
+- Insert vs append: -I INPUT <n> inserts a rule at position n. -A INPUT appends to the end of the chain, after any existing REJECT rule.
+- Persisting iptables: Rules added at runtime are lost on reboot. iptables-save writes the ruleset to a file so it can be restored.
+- Diagnostic tools: ss -tulnp shows listening ports and the owning process, systemctl status and journal logs show why a service failed, and curl -I checks the HTTP response headers from another host.
+
+Key Takeaway
+A service that is down on a port can have three causes: another process holds the port, the service is not running, or a firewall rule blocks the traffic. Check the port owner with ss first, then check the firewall rule order with iptables -L --line-numbers, and insert the ACCEPT rule above the REJECT.
+
+Security Note: The fix opened only tcp port 8086 and left the firewall running, as the task required. The 403 Forbidden response means the page content or its permissions still need a check, and the website files in /var/www/html were left unchanged.

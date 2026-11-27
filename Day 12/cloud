@@ -1,0 +1,34 @@
+Day 12 – Attach an EBS Volume to an EC2 Instance (AWS)
+
+Objective
+
+The Nautilus DevOps team has an existing EC2 instance named xfusion-ec2 and an unattached EBS volume named xfusion-volume, both in us-east-1. Attach the volume to the instance and set the device name to /dev/sdb.
+
+Configuration / Environment
+Resource        Name / ID                                   Details
+EC2 instance    xfusion-ec2 (i-06952ba388e3793b2)           Running, us-east-1a (use1-az4)
+EBS volume      xfusion-volume (vol-06004a1c06322124e)      gp2, 5 GiB, 100 IOPS, Not encrypted
+Device name     /dev/sdb                                    Data volume device name
+
+Steps Performed
+1. Opened the EC2 console and went to Volumes. The list showed 2 volumes. xfusion-volume was in the Available state with no attached resources and a status check of Okay.
+2. Selected xfusion-volume and chose Actions, then Attach volume.
+3. Confirmed the volume is in use1-az4 (us-east-1a). The instance dropdown only lists instances in the same Availability Zone as the volume, so xfusion-ec2 (running) was available to select.
+4. Selected instance i-06952ba388e3793b2 (xfusion-ec2).
+5. Set the device name to /dev/sdb in the Device name dropdown.
+6. Clicked Attach volume. The console confirmed: "Successfully attached volume vol-06004a1c06322124e to instance i-06952ba388e3793b2."
+
+Important Concepts Learned
+- EBS volume: A block storage device that attaches to one EC2 instance at a time (standard volumes) and persists independently of the instance.
+- Availability Zone match: An EBS volume can only attach to an instance in the same AZ. This is why the instance list was filtered by AZ.
+- Device name: The name, such as /dev/sdb, is how the instance refers to the volume. On Linux the OS may still assign a different name such as /dev/xvdb, so the device name in the console is a request rather than a guarantee.
+- Recommended names: AWS suggests /dev/xvda for the root volume and /dev/sd[f-p] for data volumes. /dev/sdb was accepted here as the task required.
+- Volume state: A volume shows Available when it is not attached. Once attached, its Attached resources column lists the instance.
+
+Troubleshooting
+- No Troubleshooting issues came up in this task. The volume was in the same AZ as the instance, so the instance could be selected directly.
+
+Key Takeaway
+Attaching an EBS volume is a console action that needs the volume and the instance in the same AZ. Set the device name at attach time, then format and mount the volume from inside the instance before using it.
+
+Security Note: Volumes are created unencrypted here (Encryption: Not encrypted). For sensitive data, enable encryption when creating the volume.
