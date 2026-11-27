@@ -22,6 +22,8 @@ Steps Performed
 10. Verified the rule order with sudo iptables -L -n -v --line-numbers. The new tcp dpt:8086 ACCEPT rule sat before the REJECT rule.
 11. Tested from the jump host with curl -I http://stapp01:8086. The response was HTTP/1.1 403 Forbidden from Apache/2.4.62 (CentOS Stream). The task only required Apache to be reachable on port 8086, and the 403 response confirms that it is.
 
+Result: stapp01 was the only faulty app server. stapp02 and stapp03 were not affected and did not need a change.
+
 Troubleshooting
 - Apache failed to start with "Address already in use" on port 8086. The cause was the sendmail process bound to 127.0.0.1:8086. Stopping that process freed the port.
 - A plain kill returned "Operation not permitted" because the process belonged to root. Using sudo fixed it.
