@@ -20,7 +20,7 @@ Steps Performed
 8. Added an ACCEPT rule for tcp port 8086 above the REJECT rule: sudo iptables -I INPUT 5 -p tcp --dport 8086 -j ACCEPT. A plain iptables command as tony failed with "Can't open lock file /run/xtables.lock: Permission denied", so the command was run with sudo.
 9. Tried to persist the rule with service iptables save. The command was not found, because the iptables-services package is not installed on this CentOS Stream host. Saved the ruleset with iptables-save > /etc/sysconfig/iptables as root and checked the file with cat.
 10. Verified the rule order with sudo iptables -L -n -v --line-numbers. The new tcp dpt:8086 ACCEPT rule sat before the REJECT rule.
-11. Tested from the jump host with curl -I http://stapp01:8086. The response was HTTP/1.1 403 Forbidden from Apache/2.4.62 (CentOS Stream). The 403 shows the port is reachable and Apache is answering. It is a separate issue from the connection failure.
+11. Tested from the jump host with curl -I http://stapp01:8086. The response was HTTP/1.1 403 Forbidden from Apache/2.4.62 (CentOS Stream). The task only required Apache to be reachable on port 8086, and the 403 response confirms that it is.
 
 Troubleshooting
 - Apache failed to start with "Address already in use" on port 8086. The cause was the sendmail process bound to 127.0.0.1:8086. Stopping that process freed the port.
@@ -41,4 +41,4 @@ Important Concepts Learned
 Key Takeaway
 A service that is down on a port can have three causes: another process holds the port, the service is not running, or a firewall rule blocks the traffic. Check the port owner with ss first, then check the firewall rule order with iptables -L --line-numbers, and insert the ACCEPT rule above the REJECT.
 
-Security Note: The fix opened only tcp port 8086 and left the firewall running, as the task required. The 403 Forbidden response means the page content or its permissions still need a check, and the website files in /var/www/html were left unchanged.
+Security Note: The fix opened only tcp port 8086 and left the firewall running, as the task required. The website files in /var/www/html were left unchanged.
